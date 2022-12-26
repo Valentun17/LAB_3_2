@@ -1,0 +1,135 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <time.h>
+
+double chord_method(double x1, double x2, double eps, unsigned int N);
+double div_method(double x1, double x2, double eps, unsigned int N);
+unsigned int MakeCalc(unsigned int N);
+double func(double x);
+
+int main()
+{
+    double x1, x2, eps, timings;
+    unsigned int calc_method, N = 5;
+    time_t start, end;
+
+    do
+    {
+        printf("Choose method\n\t1 - chord\n\t2 - division\n");
+        scanf("%u", &calc_method);
+    } while (calc_method != 1 && calc_method != 2);
+
+    printf("enter\n\tx1\n\tx2\n\teps\n");
+    scanf("%lf %lf %lf", &x1, &x2, &eps);
+    while (func(x1) * func(x2) > 0)
+    {
+        printf("No solutions. Try again?\n");
+        scanf("%lf %lf", &x1, &x2);
+    }
+    start = clock();
+    switch (calc_method)
+    {
+    case 1:
+        printf("\txi = %.15lf\n", chord_method(x1, x2, eps, N));
+        break;
+    case 2:
+        printf("\txi = %.15lf\n", div_method(x1, x2, eps, N));
+        break;
+    }
+    end = clock();
+    timings = (end - start);
+    printf("\tTimer: %.lfms\n", timings);
+
+    return 0;
+}
+
+double func(double x)
+{
+    return 1 / pow((1.1 + x), 2);
+}
+
+double chord_method(double x1, double x2, double eps, unsigned int N)
+{
+    double xi;
+    unsigned int type_continune = 1;
+    while (fabs(func(xi)) > eps)
+    {
+        xi = (func(x2) * x1 - func(x1) * x2) / (func(x2) - func(x1));
+        if (func(xi) * func(x1) > 0)
+            x1 = xi;
+        else
+            x2 = xi;
+        if (type_continune == 1)
+        {
+            printf("\txi = %.15lf\n", xi);
+            unsigned int i;
+            i++;
+            if (i >= N)
+            {
+                i = 0;
+                switch (MakeCalc(N))
+                {
+                case 1:
+                    break;
+                case 2:
+                    type_continune = 2;
+                    break;
+                case 3:
+                    return xi;
+                    break;
+                }
+            }
+        }
+    }
+    return xi;
+}
+
+double div_method(double x1, double x2, double eps, unsigned int N)
+{
+    double xi;
+    unsigned int type_continune = 1;
+    while (fabs(x2 - x1) >= eps)
+    {
+        xi = (x1 + x2) / 2;
+        if (func(xi) == 0)
+            break;
+        else if (func(xi) * func(x1) > 0)
+            x1 = xi;
+        else
+            x2 = xi;
+        if (type_continune == 1)
+        {
+            printf("\txi = %.15lf\n", xi);
+            unsigned int i;
+            i++;
+            if (i >= N)
+            {
+                i = 0;
+                switch (MakeCalc(N))
+                {
+                case 1:
+                    break;
+                case 2:
+                    type_continune = 2;
+                    break;
+                case 3:
+                    return xi;
+                    break;
+                }
+            }
+        }
+    }
+    return xi;
+}
+
+unsigned int MakeCalc(unsigned int N)
+{
+    unsigned int resuming;
+    while (resuming != 1 && resuming != 2 && resuming != 3)
+    {
+        printf("no solution found\n\t1 - Go on with %u more iterations\n\t2 - repeat till end\n\t3 - stop and print results\n", N);
+        scanf("%u", &resuming);
+    }
+    return resuming;
+}
